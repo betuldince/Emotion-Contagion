@@ -1,29 +1,38 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Dynamic;
 using UnityEngine;
-using UnityEngine.Splines;
 /*
-Current Implementation uses Liu et al.'s model from "A perception-based emotion contagion model in crowd emergent evacuation simulation"
-Network: Average
-Content: Arousal
-Behavior: Speed
-*/
+ * Liu et al. (2018) "A perception-based emotion contagion model in crowd emergent evacuation simulation"
+ * Eq. (7): initial emotion e0 from distance to incident (InitialPanic)
+ * Eq. (8): Me = average neighbor emotion
+ * Eq. (9): if e < Me then e := e0 + (Me - e) / Ne * w * Ab
+ * Eq. (10): v = v0(1+e) if e < el, else v0(1+K*e)
+ */
 
 public class EmotionalContaigon : MonoBehaviour
 {
     [Range(0f, 1f)][SerializeField] float initialEmotionValue = 0f;
     [Range(0f, 1f)][SerializeField] float emotionValue = 0f;
-    [Range(0f, 1f)][SerializeField] float panicThreshold = 0.5f;
+
+    [Tooltip("Liu et al. el — critical threshold for speed formula (Eq. 10)")]
+    [Range(0f, 1f)][SerializeField] float panicThreshold = 0.45f;
 
     [SerializeField] float contaigonRadius = 1.5f;
+    [Tooltip("Liu et al. Te — emotion contagion interval (seconds)")]
     [SerializeField] float contaigonRate = 1f;
 
+    [Tooltip("Liu et al. dfmin — full arousal within this distance to shooter (m)")]
     [SerializeField] float distanceMin = 5f;
+    [Tooltip("Liu et al. dfmax — no direct arousal beyond this distance (m)")]
     [SerializeField] float distanceMax = 20f;
 
-    [SerializeField] float speedModifier = 2f;
+    [Tooltip("Liu et al. w — adjustment parameter (paper supermarket example uses 6)")]
+    [SerializeField] float emotionAdjustmentW = 100f;
+    [Tooltip("Liu et al. Ab — emotion absorption coefficient (0.6–1.0 by personality; default 0.8)")]
+    [SerializeField] float absorptionCoefficient = 0.8f;
 
+    [Tooltip("Liu et al. K — speed multiplier when e >= el (Eq. 10)")]
+    [SerializeField] float speedModifier = 2f;
+    
     float initialSpeed;
 
     float elapsedTime;
@@ -34,6 +43,7 @@ public class EmotionalContaigon : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        
         victimController = GetComponent<VictimController>();
         contaigonRadius = Parameters.contagionAOE;
         initialSpeed = victimController.speed;
@@ -57,10 +67,7 @@ public class EmotionalContaigon : MonoBehaviour
 
                     if (elapsedTime >= contaigonRate)
                     {
-                        if (emotionValue < 1)
-                        {
-                            RecieveEmotion();
-                        }
+                        RecieveEmotion();
                         elapsedTime = 0f;
                     }
                 }
@@ -70,29 +77,37 @@ public class EmotionalContaigon : MonoBehaviour
 
     void RecieveEmotion()
     {
-        // Number of agents in radius
-        float n = 0f;
-        // Sum of n's emotionValues
-        float sum = 0f;
-        // Average value of nearby emotions
-        float avg = 0f;
-
-        // Find all colliders within 5 meters
+        // Eq. (8): unique neighbors within Re (one entry per agent, not per collider)
+        var neighbors = new HashSet<EmotionalContaigon>();
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, contaigonRadius);
         foreach (Collider hitCollider in hitColliders)
         {
-            // Check if the collider's game object has the EmotionalContaigon component
-            EmotionalContaigon otherEmotion = hitCollider.GetComponent<EmotionalContaigon>();
+            EmotionalContaigon otherEmotion = hitCollider.GetComponentInParent<EmotionalContaigon>();
             if (otherEmotion != null && otherEmotion != this)
             {
-                n++;
-                sum += otherEmotion.emotionValue;
+                neighbors.Add(otherEmotion);
             }
         }
-        avg = sum / n;
-        if (emotionValue < avg)
+
+        int n = neighbors.Count;
+        if (n > 0)
         {
-            emotionValue = Mathf.Clamp01(initialEmotionValue + ((avg - emotionValue) / n)); // initial article also multiplies by a modifier and susceptability (personality)
+            float sum = 0f;
+            foreach (EmotionalContaigon other in neighbors)
+            {
+                sum += other.emotionValue;
+            }
+
+            float Me = sum / n; // Eq. (8)
+            float e = emotionValue;
+
+            // Eq. (9): only pull up when below neighborhood average
+            if (e < Me)
+            {
+                float e0 = initialEmotionValue;
+                float delta = ((Me - e) / n) * emotionAdjustmentW * absorptionCoefficient;
+                emotionValue = Mathf.Clamp01(e0 + delta);
+            }
         }
 
         UpdateSpeed();
@@ -116,18 +131,24 @@ public class EmotionalContaigon : MonoBehaviour
         }
 
         initialEmotionValue = emotionValue;
-        print(this + "'s initial ev: " + emotionValue); 
+        print(this + "'s initial ev: " + emotionValue);
+        UpdateSpeed();
     }
 
     void UpdateSpeed()
     {
+        // Eq. (10)
+        float walkSpeed;
         if (emotionValue < panicThreshold)
         {
-            victimController.speed = initialSpeed * (1 + emotionValue);
-        } else
-        {  
-            victimController.speed = initialSpeed * (1 + (speedModifier * emotionValue));
+            walkSpeed = initialSpeed * (1f + emotionValue);
         }
+        else
+        {
+            walkSpeed = initialSpeed * (1f + speedModifier * emotionValue);
+        }
+
+        victimController.ApplyMovementSpeed(walkSpeed);
     }
 
     private void OnDrawGizmos()

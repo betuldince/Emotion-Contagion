@@ -59,7 +59,7 @@ public class VictimController : MonoBehaviour
         cap = GetComponent<CapsuleCollider>();
         audioSource = GetComponent<AudioSource>();
         anim.SetBool("death", false);
-        agent.speed = speed; 
+        ApplyMovementSpeed(speed);
         agent.isStopped = true;
         rotate_speed += Random.Range(-1f, 1f);
         fight = ProbabilityUtils.RandomTrue(Parameters.fightProbability);
@@ -265,6 +265,26 @@ public class VictimController : MonoBehaviour
         Debug.Log(this + "'s wait timer finished");
     }
 
+    /// <summary>
+    /// Sets base walk speed (e.g. from emotional contagion) and syncs NavMeshAgent.speed.
+    /// </summary>
+    public void ApplyMovementSpeed(float walkSpeed)
+    {
+        speed = walkSpeed;
+        SyncAgentSpeed();
+    }
+
+    void SyncAgentSpeed()
+    {
+        if (agent == null || !agent.enabled)
+        {
+            return;
+        }
+
+        float crouchFactor = anim.GetBool("crouching") ? 0.25f : 1f;
+        agent.speed = speed * crouchFactor;
+    }
+
     // Change the crouching or standing position of the victim.
     void ToggleCrouch()
     {
@@ -274,10 +294,11 @@ public class VictimController : MonoBehaviour
         }
         else
         {
-            agent.speed = agent.speed / 4;
             anim.SetBool("crouching", true);
             isHidden = true;
         }
+
+        SyncAgentSpeed();
     }
 
     // Reduce the health point of the victim that is being shot by the shooter.
