@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 22c355d7a01ca714f8911c6c4e1c2f5a
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - deathScream: {instanceID: 0}
+  - screamGroup: {instanceID: 0}
+  - deadGroan: {instanceID: 0}
+  - bloodPuddle: {fileID: 21300000, guid: e3b10d114a4c04a44ae4f76dd11b0c06, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

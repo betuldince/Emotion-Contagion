@@ -1,0 +1,82 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1233149941 &-7595611752584265697
+AudioContainerElement:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: HUMAN_VOCAL_Female_Die_Moan_Heavy_02_{-7595611752584265697}
+  m_AudioClip: {fileID: 8300000, guid: 7c7eabd277335754f998f0bd2f34b45e, type: 3}
+  m_Volume: 0
+  m_Enabled: 1
+--- !u!1233149941 &-4909829954369377319
+AudioContainerElement:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: HUMAN_VOCAL_Female_Die_Moan_Heavy_03_{-4909829954369377319}
+  m_AudioClip: {fileID: 8300000, guid: 432903b214d97ff44825ab4c1645c043, type: 3}
+  m_Volume: 0
+  m_Enabled: 1
+--- !u!1233149941 &-1620186116480664482
+AudioContainerElement:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: HUMAN_VOCAL_Female_Die_Moan_Heavy_04_{-1620186116480664482}
+  m_AudioClip: {fileID: 8300000, guid: 1a4d88cd458a3a04eb4c86e291bd69a0, type: 3}
+  m_Volume: 0
+  m_Enabled: 1
+--- !u!1233149941 &4610699870815319099
+AudioContainerElement:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: HUMAN_VOCAL_Female_Die_Moan_Heavy_08_{4610699870815319099}
+  m_AudioClip: {fileID: 8300000, guid: eaa11c741bf83e643a0663193a732f35, type: 3}
+  m_Volume: 0
+  m_Enabled: 1
+--- !u!1307931743 &6418180475301049370
+AudioRandomContainer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Female Groan Controller
+  m_Volume: 0
+  m_Pitch: 0
+  m_AutomaticTriggerTime: 4
+  m_LoopCount: 1
+  m_VolumeRandomizationRange: {x: 0, y: 0}
+  m_PitchRandomizationRange: {x: 0, y: 0}
+  m_AutomaticTriggerTimeRandomizationRange: {x: 0, y: 4}
+  m_LoopCountRandomizationRange: {x: 0, y: 0}
+  m_Elements:
+  - {fileID: -7595611752584265697}
+  - {fileID: -4909829954369377319}
+  - {fileID: -1620186116480664482}
+  - {fileID: 4610699870815319099}
+  - {fileID: 6585780024896763174}
+  m_AvoidRepeatingLast: 0
+  m_PlaybackMode: 0
+  m_TriggerMode: 1
+  m_AutomaticTriggerMode: 1
+  m_LoopMode: 0
+  m_VolumeRandomizationEnabled: 0
+  m_PitchRandomizationEnabled: 0
+  m_AutomaticTriggerTimeRandomizationEnabled: 1
+  m_LoopCountRandomizationEnabled: 0
+--- !u!1233149941 &6585780024896763174
+AudioContainerElement:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: HUMAN_VOCAL_Female_Die_Moan_Heavy_09_{6585780024896763174}
+  m_AudioClip: {fileID: 8300000, guid: 673d3394b806293498155c6cfcd92892, type: 3}
+  m_Volume: 0
+  m_Enabled: 1

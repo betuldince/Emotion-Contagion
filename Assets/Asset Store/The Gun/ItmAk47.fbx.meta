@@ -1,0 +1,75 @@
+fileFormatVersion: 2
+guid: 3057585e25e5dfc4a85104349af0d118
+ModelImporter:
+  serializedVersion: 15
+  fileIDToRecycleName:
+    100000: IctUnitySettings
+    100002: MountPoint_ItmAk47Handle
+    100004: //RootNode
+    100006: ItmAk47
+    100008: _IctSettings_
+    100010: EnvExportSettings
+    100012: MountPoint_ItmAk47Barrel
+    400000: IctUnitySettings
+    400002: MountPoint_ItmAk47Handle
+    400004: //RootNode
+    400006: ItmAk47
+    400008: _IctSettings_
+    400010: EnvExportSettings
+    400012: MountPoint_ItmAk47Barrel
+    2300000: ItmAk47
+    2300002: //RootNode
+    3300000: ItmAk47
+    3300002: //RootNode
+    4300000: ItmAk47
+    11100000: //RootNode
+  materials:
+    importMaterials: 1
+    materialName: 1
+    materialSearch: 2
+  animations:
+    legacyGenerateAnimations: 3
+    bakeSimulation: 0
+    animationCompression: 1
+    animationRotationError: .5
+    animationPositionError: .5
+    animationScaleError: .5
+    animationWrapMode: 0
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: .00999999978
+    meshCompression: 0
+    addColliders: 0
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+  tangentSpace:
+    normalSmoothAngle: 60
+    splitTangentsAcrossUV: 1
+    normalImportMode: 0
+    tangentImportMode: 1
+  importAnimation: 0
+  copyAvatar: 0
+  humanDescription:
+    human: []
+    skeleton: []
+    handles: []
+    armTwist: .5
+    foreArmTwist: .5
+    upperLegTwist: .5
+    legTwist: .5
+    armStretch: .0500000007
+    legStretch: .0500000007
+    feetSpacing: 0
+    rootMotionBoneName: 
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  additionalBone: 1
+  animationType: 0
+  userData: 

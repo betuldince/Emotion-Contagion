@@ -1,0 +1,62 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+
+public class Parameters : MonoBehaviour
+{
+    public enum Distribution
+    {
+        Mixed,
+        Run,
+        Hide
+    }
+
+    // Determines the size of an agent's emotional contagion area of effect
+    public static float contagionAOE = 5f;
+
+    // ** Currently OBSOLETE: current behavior is based on all 3 conditions
+    // Determines which distribution agents will choose their initial destination based on
+    public static Distribution distribution = Distribution.Mixed;
+
+    // ** Currently OBSOLETE: behavior contagion not yet implemented
+    // Determines whether or not behavior contagion will consider only emotional agents in AOE, or everyone in AOE
+    public static bool emotionalOnly = false;
+
+    // Toggles screaming, groaning, and blood
+    public static bool gore = true;
+
+    // the probability that a student will attack the shooter
+    public static float fightProbability = 0f;
+
+    [SerializeField] Slider aoeSlider;
+    [SerializeField] TMP_Dropdown distributionSelect;
+    [SerializeField] Toggle emotionToggle;
+    [SerializeField] Toggle goreToggle;
+    [SerializeField] Slider fightProbabilitySlider;
+
+
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        
+    }
+
+    public void assignParameters()
+    {
+        contagionAOE = aoeSlider.value;
+        distribution = (Distribution)distributionSelect.value;
+        emotionalOnly = emotionToggle.isOn;
+        gore = goreToggle.isOn;
+        fightProbability = fightProbabilitySlider.value / 100;
+        print(fightProbability);
+    }
+}
