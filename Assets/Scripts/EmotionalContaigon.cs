@@ -26,7 +26,7 @@ public class EmotionalContaigon : MonoBehaviour
     [SerializeField] float distanceMax = 20f;
 
     [Tooltip("Liu et al. w — adjustment parameter (paper supermarket example uses 6)")]
-    [SerializeField] float emotionAdjustmentW = 100f;
+    [SerializeField] float emotionAdjustmentW = 30f;
     [Tooltip("Liu et al. Ab — emotion absorption coefficient (0.6–1.0 by personality; default 0.8)")]
     [SerializeField] float absorptionCoefficient = 0.8f;
 
