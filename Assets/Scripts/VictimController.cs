@@ -32,7 +32,10 @@ public class VictimController : MonoBehaviour
 
     private float lastAttackTime; // Tracks time of the last attack
 
-    private bool run = false;
+    [HideInInspector] public bool run = false;
+    [HideInInspector] public bool initialRun = false;
+    [HideInInspector] public bool hasMadeChoice = false;
+    public bool IsFighting => fight;
     private bool fight = false;
     private bool changeBaseOffset = false;
     private bool isWaiting = true;
@@ -44,7 +47,8 @@ public class VictimController : MonoBehaviour
     private CapsuleCollider cap;
     private AudioSource audioSource;
 
-    private Vector3 destination;
+    [HideInInspector] public Vector3 destination;
+    [HideInInspector] public Vector3 initialDestination;
 
     /*    int maxHealth = 2;
         int curHealth;*/
@@ -53,7 +57,11 @@ public class VictimController : MonoBehaviour
 
     void Start()
     {
-        //curHealth = maxHealth;
+        if (GetComponent<BehaviorContagion>() == null)
+        {
+            gameObject.AddComponent<BehaviorContagion>();
+        }
+
         agent = GetComponent<NavMeshAgent>();
         anim = GetComponent<Animator>();
         cap = GetComponent<CapsuleCollider>();
@@ -78,57 +86,52 @@ public class VictimController : MonoBehaviour
         }
         else
         {
-            //Debug.Log("selecting run/hide");
-            // modify this to instead be a ratio of what the people around them are doing * need a base decision  
-            float rand = Random.Range(0, 1);
-            float probability = ProbabilityUtils.EvaluateDefaultSpline(rand);
-            run = ProbabilityUtils.RandomTrue(probability);
-
-            if (run)
-            {
-                SelectRunDestination();
-            }
-            else
-            {
-                SelectHideDestination();
-            }
+            StartCoroutine(DecideAndApplyContagion());
         }
     }
 
-    void SelectRunDestination()
+    IEnumerator DecideAndApplyContagion()
     {
-        //Debug.Log("running");
+        float rand = Random.Range(0, 1);
+        float probability = ProbabilityUtils.EvaluateDefaultSpline(rand);
+        run = ProbabilityUtils.RandomTrue(probability);
+        destination = run ? PickRunDestination() : PickHideDestination();
+        initialRun = run;
+        initialDestination = destination;
+        hasMadeChoice = true;
+
+        if (Parameters.behaviourActive)
+        {
+            yield return new WaitForEndOfFrame();
+            GetComponent<BehaviorContagion>()?.TryApplyMajority(this);
+        }
+
+        agent.SetDestination(destination);
+        Debug.Log(this + (run ? "'s run destination: " : "'s hide destination: ") + destination);
+    }
+
+    Vector3 PickRunDestination()
+    {
         RunDestinations rd = GameObject.FindAnyObjectByType<RunDestinations>();
-        destination = rd.SelectDestination().position;
-        NavMeshHit hit;
-        if (NavMesh.SamplePosition(destination, out hit, 1.0f, NavMesh.AllAreas))
-        {
-            agent.SetDestination(hit.position);
-        }
-        else
-        {
-            Debug.LogError(this + " destination not on NavMesh: " + destination);
-        }
-        agent.SetDestination(destination);
-        Debug.Log(this + "'s run destination: " + destination);
+        return SampleNavMeshDestination(rd.SelectDestination().position, "run");
     }
 
-    void SelectHideDestination()
+    Vector3 PickHideDestination()
     {
-        //Debug.Log("hiding");
         HideDestinations hd = GameObject.FindAnyObjectByType<HideDestinations>();
-        destination = hd.SelectDestination().position;
+        return SampleNavMeshDestination(hd.SelectDestination().position, "hide");
+    }
+
+    Vector3 SampleNavMeshDestination(Vector3 target, string label)
+    {
         NavMeshHit hit;
-        if (NavMesh.SamplePosition(destination, out hit, 1.0f, NavMesh.AllAreas))
+        if (NavMesh.SamplePosition(target, out hit, 1.0f, NavMesh.AllAreas))
         {
-            agent.SetDestination(hit.position);
+            return hit.position;
         }
-        else
-        {
-            Debug.LogError(this + " destination not on NavMesh: " + destination);
-        }
-        agent.SetDestination(destination);
-        Debug.Log(this + "'s hide destination: " + destination);
+
+        Debug.LogError(this + " " + label + " destination not on NavMesh: " + target);
+        return target;
     }
 
     void AttackShooter()

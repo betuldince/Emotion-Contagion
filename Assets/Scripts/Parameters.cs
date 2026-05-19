@@ -20,9 +20,8 @@ public class Parameters : MonoBehaviour
     // Determines which distribution agents will choose their initial destination based on
     public static Distribution distribution = Distribution.Mixed;
 
-    // ** Currently OBSOLETE: behavior contagion not yet implemented
-    // Determines whether or not behavior contagion will consider only emotional agents in AOE, or everyone in AOE
-    public static bool emotionalOnly = false;
+    // Menu "Behavior Contagion" toggle — majority run/hide + destination from neighbors in AOE
+    public static bool behaviourActive = false;
 
     // Toggles screaming, groaning, and blood
     public static bool gore = true;
@@ -54,7 +53,7 @@ public class Parameters : MonoBehaviour
     {
         contagionAOE = aoeSlider.value;
         distribution = (Distribution)distributionSelect.value;
-        emotionalOnly = emotionToggle.isOn;
+        behaviourActive = emotionToggle.isOn;
         gore = goreToggle.isOn;
         fightProbability = fightProbabilitySlider.value / 100;
         print(fightProbability);
