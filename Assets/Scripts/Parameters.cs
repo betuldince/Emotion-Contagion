@@ -23,6 +23,7 @@ public class Parameters : MonoBehaviour
     // Menu "Behavior Contagion" toggle — majority run/hide + destination from neighbors in AOE
     public static bool behaviourActive = false;
 
+    // Proportional run/hide + B (independent of behaviourActive / majority toggle)
     public static bool proportionActive = false;
     // Toggles screaming, groaning, and blood
     public static bool gore = true;
@@ -30,6 +31,7 @@ public class Parameters : MonoBehaviour
     // the probability that a student will attack the shooter
     public static float fightProbability = 0f;
 
+    // Contagion strength B (0-1). Destination follows crowd majority only when B > 0.5
     public static float proportionStrengthB = 0f;
 
     [SerializeField] Slider aoeSlider;

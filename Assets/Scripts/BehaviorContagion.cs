@@ -1,25 +1,138 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 /// <summary>
-/// After each NPC picks run/hide and a destination, optionally copy the local majority.
+/// After each NPC picks run/hide and a destination, optionally adjust from neighbors.
+/// behaviourActive → majority; proportionActive → proportional + B; neither → no change (empirical only).
 /// </summary>
 public class BehaviorContagion : MonoBehaviour
 {
+    public void ApplyContagion(VictimController self)
+    {
+        if (Parameters.behaviourActive)
+        {
+            TryApplyMajority(self);
+        }
+
+        if (Parameters.proportionActive)
+        {
+            TryApplyProportional(self);
+        }
+    }
+
     public void TryApplyMajority(VictimController self)
     {
-        if (!Parameters.behaviourActive)
+        int runCount = 0;
+        int hideCount = 0;
+        var runSpots = new List<Vector3>();
+        var hideSpots = new List<Vector3>();
+        GatherNeighborCounts(self, out runCount, out hideCount, runSpots, hideSpots);
+
+        if (runCount == 0 && hideCount == 0)
         {
             return;
         }
+
+        if (runCount == hideCount)
+        {
+            return;
+        }
+
+        if (runCount > hideCount)
+        {
+            self.run = true;
+            self.destination = MostCommonSpot(runSpots, self.initialDestination);
+        }
+        else
+        {
+            self.run = false;
+            self.destination = MostCommonSpot(hideSpots, self.initialDestination);
+        }
+    }
+
+    public void TryApplyProportional(VictimController self)
+    {
+        float B = Mathf.Clamp01(Parameters.proportionStrengthB);
 
         int runCount = 0;
         int hideCount = 0;
         var runSpots = new List<Vector3>();
         var hideSpots = new List<Vector3>();
-        var seen = new HashSet<VictimController>();
+        GatherNeighborCounts(self, out runCount, out hideCount, runSpots, hideSpots);
 
+        float priorRun = self.priorRun;
+        float priorHide = 1f - priorRun;
+
+        float P_run;
+        float P_hide;
+
+        int nTotal = runCount + hideCount;
+        if (nTotal == 0)
+        {
+            P_run = priorRun;
+            P_hide = priorHide;
+        }
+        else
+        {
+            float s_run = (float)runCount / nTotal;
+            float s_hide = (float)hideCount / nTotal;
+
+            float rawRun = (1f - B) * priorRun + B * s_run;
+            float rawHide = (1f - B) * priorHide + B * s_hide;
+            float sum = rawRun + rawHide;
+            if (sum <= 0f)
+            {
+                P_run = priorRun;
+                P_hide = priorHide;
+            }
+            else
+            {
+                P_run = rawRun / sum;
+                P_hide = rawHide / sum;
+            }
+        }
+
+        float u = Random.value;
+        self.run = u < P_run;
+
+        if (B > 0.5f)
+        {
+            var matchingSpots = self.run ? runSpots : hideSpots;
+            Vector3 empirical = self.run ? PickEmpiricalRunDestination() : PickEmpiricalHideDestination();
+
+            if (matchingSpots.Count > 0)
+            {
+                self.destination = MostCommonSpot(matchingSpots, empirical);
+            }
+            else
+            {
+                self.destination = empirical;
+            }
+        }
+        else
+        {
+            self.destination = self.run
+                ? PickEmpiricalRunDestination()
+                : PickEmpiricalHideDestination();
+        }
+    }
+
+    static void GatherNeighborCounts(
+        VictimController self,
+        out int runCount,
+        out int hideCount,
+        List<Vector3> runSpots,
+        List<Vector3> hideSpots)
+    {
+        runCount = 0;
+        hideCount = 0;
+        runSpots.Clear();
+        hideSpots.Clear();
+
+        var seen = new HashSet<VictimController>();
         Collider[] hits = Physics.OverlapSphere(self.transform.position, Parameters.contagionAOE);
+
         foreach (Collider hit in hits)
         {
             VictimController other = hit.GetComponentInParent<VictimController>();
@@ -44,28 +157,6 @@ public class BehaviorContagion : MonoBehaviour
                 hideCount++;
                 hideSpots.Add(other.initialDestination);
             }
-        }
-
-        // Nobody nearby, or tie — keep original choice
-        if (runCount == 0 && hideCount == 0)
-        {
-            return;
-        }
-
-        if (runCount == hideCount)
-        {
-            return;
-        }
-
-        if (runCount > hideCount)
-        {
-            self.run = true;
-            self.destination = MostCommonSpot(runSpots, self.initialDestination);
-        }
-        else
-        {
-            self.run = false;
-            self.destination = MostCommonSpot(hideSpots, self.initialDestination);
         }
     }
 
@@ -109,6 +200,29 @@ public class BehaviorContagion : MonoBehaviour
         return tied ? fallback : bestSpot;
     }
 
+    static Vector3 PickEmpiricalRunDestination()
+    {
+        RunDestinations rd = Object.FindAnyObjectByType<RunDestinations>();
+        return SampleNavMeshDestination(rd.SelectDestination().position);
+    }
+
+    static Vector3 PickEmpiricalHideDestination()
+    {
+        HideDestinations hd = Object.FindAnyObjectByType<HideDestinations>();
+        return SampleNavMeshDestination(hd.SelectDestination().position);
+    }
+
+    static Vector3 SampleNavMeshDestination(Vector3 target)
+    {
+        NavMeshHit hit;
+        if (NavMesh.SamplePosition(target, out hit, 1.0f, NavMesh.AllAreas))
+        {
+            return hit.position;
+        }
+
+        return target;
+    }
+
     static Vector3 RoundSpot(Vector3 position)
     {
         return new Vector3(
@@ -119,8 +233,7 @@ public class BehaviorContagion : MonoBehaviour
 
     void OnDrawGizmosSelected()
     {
-        float radius = Application.isPlaying ? Parameters.contagionAOE : Parameters.contagionAOE;
         Gizmos.color = new Color(0.2f, 0.85f, 0.35f, 0.5f);
-        Gizmos.DrawWireSphere(transform.position, radius);
+        Gizmos.DrawWireSphere(transform.position, Parameters.contagionAOE);
     }
 }

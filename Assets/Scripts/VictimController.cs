@@ -49,6 +49,7 @@ public class VictimController : MonoBehaviour
 
     [HideInInspector] public Vector3 destination;
     [HideInInspector] public Vector3 initialDestination;
+    [HideInInspector] public float priorRun;
 
     /*    int maxHealth = 2;
         int curHealth;*/
@@ -94,16 +95,17 @@ public class VictimController : MonoBehaviour
     {
         float rand = Random.Range(0, 1);
         float probability = ProbabilityUtils.EvaluateDefaultSpline(rand);
+        priorRun = probability;
         run = ProbabilityUtils.RandomTrue(probability);
         destination = run ? PickRunDestination() : PickHideDestination();
         initialRun = run;
         initialDestination = destination;
         hasMadeChoice = true;
 
-        if (Parameters.behaviourActive)
+        if (Parameters.behaviourActive || Parameters.proportionActive)
         {
             yield return new WaitForEndOfFrame();
-            GetComponent<BehaviorContagion>()?.TryApplyMajority(this);
+            GetComponent<BehaviorContagion>()?.ApplyContagion(this);
         }
 
         agent.SetDestination(destination);
