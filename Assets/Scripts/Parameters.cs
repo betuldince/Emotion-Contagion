@@ -23,15 +23,21 @@ public class Parameters : MonoBehaviour
     // Menu "Behavior Contagion" toggle — majority run/hide + destination from neighbors in AOE
     public static bool behaviourActive = false;
 
+    public static bool proportionActive = false;
     // Toggles screaming, groaning, and blood
     public static bool gore = true;
 
     // the probability that a student will attack the shooter
     public static float fightProbability = 0f;
 
+    public static float proportionStrengthB = 0f;
+
     [SerializeField] Slider aoeSlider;
+
+    [SerializeField] Slider proportionStrengthBSlider;
     [SerializeField] TMP_Dropdown distributionSelect;
     [SerializeField] Toggle emotionToggle;
+    [SerializeField] Toggle proportionToggle;
     [SerializeField] Toggle goreToggle;
     [SerializeField] Slider fightProbabilitySlider;
 
@@ -54,8 +60,10 @@ public class Parameters : MonoBehaviour
         contagionAOE = aoeSlider.value;
         distribution = (Distribution)distributionSelect.value;
         behaviourActive = emotionToggle.isOn;
+        proportionActive = proportionToggle.isOn;
         gore = goreToggle.isOn;
         fightProbability = fightProbabilitySlider.value / 100;
         print(fightProbability);
+        proportionStrengthB = proportionStrengthBSlider.value;
     }
 }
