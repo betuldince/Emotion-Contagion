@@ -4,7 +4,7 @@ using UnityEngine.AI;
 
 /// <summary>
 /// After each NPC picks run/hide and a destination, optionally adjust from neighbors.
-/// behaviourActive → majority; proportionActive → proportional + B; neither → no change (empirical only).
+/// behaviourActive → majority; proportionActive → proportional + B; quorumActive → quorum threshold.
 /// </summary>
 public class BehaviorContagion : MonoBehaviour
 {
@@ -18,6 +18,11 @@ public class BehaviorContagion : MonoBehaviour
         if (Parameters.proportionActive)
         {
             TryApplyProportional(self);
+        }
+
+        if (Parameters.quorumActive)
+        {
+            TryApplyQuorum(self);
         }
     }
 
@@ -45,6 +50,37 @@ public class BehaviorContagion : MonoBehaviour
             self.destination = MostCommonSpot(runSpots, self.initialDestination);
         }
         else
+        {
+            self.run = false;
+            self.destination = MostCommonSpot(hideSpots, self.initialDestination);
+        }
+    }
+
+    public void TryApplyQuorum(VictimController self)
+    {
+        float q = Mathf.Clamp01(Parameters.quorumThreshold);
+
+        int runCount = 0;
+        int hideCount = 0;
+        var runSpots = new List<Vector3>();
+        var hideSpots = new List<Vector3>();
+        GatherNeighborCounts(self, out runCount, out hideCount, runSpots, hideSpots);
+
+        int nTotal = runCount + hideCount;
+        if (nTotal == 0)
+        {
+            return;
+        }
+
+        float s_run = (float)runCount / nTotal;
+        float s_hide = (float)hideCount / nTotal;
+
+        if (s_run >= q && s_hide < q)
+        {
+            self.run = true;
+            self.destination = MostCommonSpot(runSpots, self.initialDestination);
+        }
+        else if (s_hide >= q && s_run < q)
         {
             self.run = false;
             self.destination = MostCommonSpot(hideSpots, self.initialDestination);

@@ -102,7 +102,7 @@ public class VictimController : MonoBehaviour
         initialDestination = destination;
         hasMadeChoice = true;
 
-        if (Parameters.behaviourActive || Parameters.proportionActive)
+        if (Parameters.behaviourActive || Parameters.proportionActive || Parameters.quorumActive)
         {
             yield return new WaitForEndOfFrame();
             GetComponent<BehaviorContagion>()?.ApplyContagion(this);
