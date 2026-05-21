@@ -15,6 +15,7 @@ public class Parameters : MonoBehaviour
 
     // Determines the size of an agent's emotional contagion area of effect
     public static float contagionAOE = 5f;
+    public static float quorumThreshold = 0.5f;
 
     // ** Currently OBSOLETE: current behavior is based on all 3 conditions
     // Determines which distribution agents will choose their initial destination based on
@@ -25,7 +26,9 @@ public class Parameters : MonoBehaviour
 
     // Proportional run/hide + B (independent of behaviourActive / majority toggle)
     public static bool proportionActive = false;
+    public static bool quorumActive = false;
     // Toggles screaming, groaning, and blood
+    
     public static bool gore = true;
 
     // the probability that a student will attack the shooter
@@ -41,7 +44,9 @@ public class Parameters : MonoBehaviour
     [SerializeField] Toggle emotionToggle;
     [SerializeField] Toggle proportionToggle;
     [SerializeField] Toggle goreToggle;
+    [SerializeField] Toggle quorumToggle;
     [SerializeField] Slider fightProbabilitySlider;
+    [SerializeField] Slider quorumSlider;
 
 
 
@@ -63,9 +68,11 @@ public class Parameters : MonoBehaviour
         distribution = (Distribution)distributionSelect.value;
         behaviourActive = emotionToggle.isOn;
         proportionActive = proportionToggle.isOn;
+        quorumActive = quorumToggle.isOn;
         gore = goreToggle.isOn;
         fightProbability = fightProbabilitySlider.value / 100;
         print(fightProbability);
         proportionStrengthB = proportionStrengthBSlider.value;
+        quorumThreshold = quorumSlider.value;
     }
 }
