@@ -23,12 +23,13 @@ public class Parameters : MonoBehaviour
 
     // Menu "Behavior Contagion" toggle — majority run/hide + destination from neighbors in AOE
     public static bool behaviourActive = false;
+    public static bool weightedbyDistance = false;
 
     // Proportional run/hide + B (independent of behaviourActive / majority toggle)
     public static bool proportionActive = false;
     public static bool quorumActive = false;
-    // Toggles screaming, groaning, and blood
-    
+     // Toggles screaming, groaning, and blood
+
     public static bool gore = true;
 
     // the probability that a student will attack the shooter
@@ -44,6 +45,7 @@ public class Parameters : MonoBehaviour
     [SerializeField] Toggle emotionToggle;
     [SerializeField] Toggle proportionToggle;
     [SerializeField] Toggle goreToggle;
+    [SerializeField] Toggle weightedbyDistanceToggle;
     [SerializeField] Toggle quorumToggle;
     [SerializeField] Slider fightProbabilitySlider;
     [SerializeField] Slider quorumSlider;
@@ -74,5 +76,6 @@ public class Parameters : MonoBehaviour
         print(fightProbability);
         proportionStrengthB = proportionStrengthBSlider.value;
         quorumThreshold = quorumSlider.value;
+        weightedbyDistance = weightedbyDistanceToggle.isOn;
     }
 }

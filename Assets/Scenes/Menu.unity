@@ -1766,6 +1766,7 @@ MonoBehaviour:
   emotionToggle: {fileID: 1259580164}
   proportionToggle: {fileID: 1444891339}
   goreToggle: {fileID: 1927492292}
+  weightedbyDistanceToggle: {fileID: 1371668019}
   quorumToggle: {fileID: 256404102}
   fightProbabilitySlider: {fileID: 1586847751}
   quorumSlider: {fileID: 1416616739}
@@ -7307,7 +7308,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Weighted by distance
+  m_Text: Is it weighted by distance?
 --- !u!222 &2038333182
 CanvasRenderer:
   m_ObjectHideFlags: 0
