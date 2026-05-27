@@ -10,9 +10,9 @@ using UnityEngine.AI;
 
 /// After each NPC picks run/hide and a destination, optionally adjust from neighbors.
 
-/// behaviourActive → majority; proportionActive → proportional + B; quorumActive → quorum threshold.
+/// behaviourActive → majority; proportionActive → proportional + B; stacyProportionActive → two-step proportional;
 
-/// weightedbyDistance → linear weight w = 1 - distance/contagionAOE on all three models.
+/// quorumActive → quorum threshold; weightedbyDistance → w = 1 - distance/contagionAOE.
 
 /// </summary>
 
@@ -39,6 +39,16 @@ public class BehaviorContagion : MonoBehaviour
         {
 
             TryApplyProportional(self);
+
+        }
+
+
+
+        if (Parameters.stacyProportionActive)
+
+        {
+
+            TryApplyStacyProportional(self);
 
         }
 
@@ -453,6 +463,272 @@ public class BehaviorContagion : MonoBehaviour
         self.run = u < P_run;
 
 
+
+        if (B > 0.5f)
+
+        {
+
+            var matchingSpots = self.run ? runSpots : hideSpots;
+
+            var matchingWeights = self.run ? runSpotWeights : hideSpotWeights;
+
+            Vector3 empirical = self.run ? PickEmpiricalRunDestination() : PickEmpiricalHideDestination();
+
+
+
+            if (matchingSpots.Count > 0)
+
+            {
+
+                self.destination = Parameters.weightedbyDistance
+
+                    ? MostCommonSpotWeighted(matchingSpots, matchingWeights, empirical)
+
+                    : MostCommonSpot(matchingSpots, empirical);
+
+            }
+
+            else
+
+            {
+
+                self.destination = empirical;
+
+            }
+
+        }
+
+        else
+
+        {
+
+            self.destination = self.run
+
+                ? PickEmpiricalRunDestination()
+
+                : PickEmpiricalHideDestination();
+
+        }
+
+    }
+
+
+
+    public void TryApplyStacyProportional(VictimController self)
+
+    {
+
+        float B = Mathf.Clamp01(Parameters.stacyProportionStrengthB);
+
+
+
+        GatherNeighborData(
+
+            self,
+
+            out int runCount,
+
+            out int hideCount,
+
+            out float runInfluence,
+
+            out float hideInfluence,
+
+            out List<Vector3> runSpots,
+
+            out List<float> runSpotWeights,
+
+            out List<Vector3> hideSpots,
+
+            out List<float> hideSpotWeights);
+
+
+
+        float priorRun = self.priorRun;
+
+        float priorHide = 1f - priorRun;
+
+
+
+        float P_run;
+
+        float P_hide;
+
+        float P_run_i;
+
+        float P_hide_i;
+
+
+
+        if (!TryGetSocialShares(runCount, hideCount, runInfluence, hideInfluence, out float s_run, out float s_hide))
+
+        {
+
+            P_run = priorRun;
+
+            P_hide = priorHide;
+
+            P_run_i = priorRun;
+
+            P_hide_i = priorHide;
+
+        }
+
+        else
+
+        {
+
+            NormalizeBlendedProbabilities(B, priorRun, priorHide, s_run, s_hide, out P_run, out P_hide);
+
+            NormalizeBlendedProbabilities(B, P_run, P_hide, s_run, s_hide, out P_run_i, out P_hide_i);
+
+        }
+
+
+
+        self.run = Random.value < P_run_i;
+
+        ApplyProportionalDestination(self, B, runSpots, runSpotWeights, hideSpots, hideSpotWeights);
+
+    }
+
+
+
+    static bool TryGetSocialShares(
+
+        int runCount,
+
+        int hideCount,
+
+        float runInfluence,
+
+        float hideInfluence,
+
+        out float s_run,
+
+        out float s_hide)
+
+    {
+
+        if (Parameters.weightedbyDistance)
+
+        {
+
+            float totalInfluence = runInfluence + hideInfluence;
+
+            if (totalInfluence <= 0f)
+
+            {
+
+                s_run = 0f;
+
+                s_hide = 0f;
+
+                return false;
+
+            }
+
+
+
+            s_run = runInfluence / totalInfluence;
+
+            s_hide = hideInfluence / totalInfluence;
+
+            return true;
+
+        }
+
+
+
+        int nTotal = runCount + hideCount;
+
+        if (nTotal == 0)
+
+        {
+
+            s_run = 0f;
+
+            s_hide = 0f;
+
+            return false;
+
+        }
+
+
+
+        s_run = (float)runCount / nTotal;
+
+        s_hide = (float)hideCount / nTotal;
+
+        return true;
+
+    }
+
+
+
+    static void NormalizeBlendedProbabilities(
+
+        float B,
+
+        float runBase,
+
+        float hideBase,
+
+        float s_run,
+
+        float s_hide,
+
+        out float P_run,
+
+        out float P_hide)
+
+    {
+
+        float rawRun = (1f - B) * runBase + B * s_run;
+
+        float rawHide = (1f - B) * hideBase + B * s_hide;
+
+        float sum = rawRun + rawHide;
+
+        if (sum <= 0f)
+
+        {
+
+            P_run = runBase;
+
+            P_hide = hideBase;
+
+        }
+
+        else
+
+        {
+
+            P_run = rawRun / sum;
+
+            P_hide = rawHide / sum;
+
+        }
+
+    }
+
+
+
+    static void ApplyProportionalDestination(
+
+        VictimController self,
+
+        float B,
+
+        List<Vector3> runSpots,
+
+        List<float> runSpotWeights,
+
+        List<Vector3> hideSpots,
+
+        List<float> hideSpotWeights)
+
+    {
 
         if (B > 0.5f)
 
