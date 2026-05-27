@@ -27,6 +27,7 @@ public class Parameters : MonoBehaviour
 
     // Proportional run/hide + B (independent of behaviourActive / majority toggle)
     public static bool proportionActive = false;
+    public static bool stacyProportionActive = false;
     public static bool quorumActive = false;
      // Toggles screaming, groaning, and blood
 
@@ -37,6 +38,7 @@ public class Parameters : MonoBehaviour
 
     // Contagion strength B (0-1). Destination follows crowd majority only when B > 0.5
     public static float proportionStrengthB = 0f;
+    public static float stacyProportionStrengthB = 0f;
 
     [SerializeField] Slider aoeSlider;
 
@@ -47,8 +49,10 @@ public class Parameters : MonoBehaviour
     [SerializeField] Toggle goreToggle;
     [SerializeField] Toggle weightedbyDistanceToggle;
     [SerializeField] Toggle quorumToggle;
+    [SerializeField] Toggle stacyProportionToggle;
     [SerializeField] Slider fightProbabilitySlider;
     [SerializeField] Slider quorumSlider;
+    [SerializeField] Slider stacyProportionStrengthBSlider;
 
 
 
@@ -77,5 +81,8 @@ public class Parameters : MonoBehaviour
         proportionStrengthB = proportionStrengthBSlider.value;
         quorumThreshold = quorumSlider.value;
         weightedbyDistance = weightedbyDistanceToggle.isOn;
+        stacyProportionActive = stacyProportionToggle.isOn;
+        stacyProportionStrengthB = stacyProportionStrengthBSlider.value;
+
     }
 }
